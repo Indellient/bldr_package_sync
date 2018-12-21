@@ -11,6 +11,8 @@ type Syncer struct {
 
 func (syncer Syncer) syncKeys() bool {
 	log.Debug("Beginning the key sync process")
+	// upstream := BldrApi{url: syncer.config.upstream}
+	// keys := upstream.fetchKeyPaths()
 	return true
 }
 
