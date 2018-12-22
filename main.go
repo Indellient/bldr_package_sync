@@ -49,7 +49,9 @@ func main() {
 					log.Error(err)
 					return err
 				}
+				log.Info(config)
 				syncer := Syncer{config: config}
+				log.Info(syncer)
 				return syncer.run()
 			},
 		},

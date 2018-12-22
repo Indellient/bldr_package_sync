@@ -6,14 +6,14 @@ import (
 )
 
 func TestFetchKeyPaths(t *testing.T) {
-	api := BldrApi{url: "https://bldr.habitat.sh"}
+	api := BldrApi{Url: "https://bldr.habitat.sh"}
 	if len(api.fetchKeyPaths("core")) <= 0 {
 		t.Error("Fetching Paths returned an slice <= 0")
 	}
 }
 
 func TestFetchKeyData(t *testing.T) {
-	api := BldrApi{url: "https://bldr.habitat.sh"}
+	api := BldrApi{Url: "https://bldr.habitat.sh"}
 	key := api.fetchKeyPaths("core")[0]
 	data := api.fetchKeyData(key)
 
