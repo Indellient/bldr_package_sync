@@ -50,6 +50,8 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 				// log.Debug("Uploading package " + pkgName)
 				// packageUpload(target, file, "stable")
 				files = append(files, file)
+			} else {
+				log.Debug(fmt.Sprintf("Dependancy %s exists in target, skipping download", pkgName))
 			}
 		}
 
