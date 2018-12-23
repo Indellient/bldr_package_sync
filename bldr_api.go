@@ -145,11 +145,13 @@ func (api BldrApi) fetchPackageDeps(pkg PackageData) []PackageData {
 		return pkgs
 	}
 
-	for _, p := range data.TDeps {
+	tdeps := data.TDeps
+	deps := append(data.Deps, tdeps...)
+	for _, p := range deps {
 		if len(pkgs) <= 0 {
 			pkgs = []PackageData{p}
 		}
-		return append(pkgs, api.fetchPackageDeps(p)...)
+		pkgs = append(pkgs, api.fetchPackageDeps(p)...)
 	}
 
 	return pkgs

@@ -1,6 +1,6 @@
 interval = 300
 
-origins = ["core"]
+origins = ["habitat"]
 
 [upstream]
 url = "https://bldr.habitat.sh"

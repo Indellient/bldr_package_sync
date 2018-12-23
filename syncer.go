@@ -26,38 +26,46 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 
 	log.Debug(fmt.Sprintf("Determining TDEPS for %d packages", len(pkgDatas)))
 
+	for i := len(pkgDatas)/2 - 1; i >= 0; i-- {
+		opp := len(pkgDatas) - 1 - i
+		pkgDatas[i], pkgDatas[opp] = pkgDatas[opp], pkgDatas[i]
+	}
+
 	// var wg sync.WaitGroup
-	for _, p := range pkgDatas {
+	for j, p := range pkgDatas {
 		// wg.Add(1)
 		// go func(wg *sync.WaitGroup) {
+		files := []string{}
 		deps := upstream.fetchPackageDeps(p)
-		for _, pkg := range deps {
+		log.Debug(fmt.Sprintf("Determined deps %s", deps))
+		for i, pkg := range deps {
 			pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
-			pack := upstream.fetchPackage(pkg)
-			// if targPack.Name != "" {
-			if !target.packageExists(pack.Ident) {
+
+			log.Debug(fmt.Sprintf("Dependancy [%d/%d] %s", i+1, len(deps), pkgName))
+			if !target.packageExists(pkg) {
+				pack := upstream.fetchPackage(pkg)
+				// if targPack.Name != "" {
 				log.Debug(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
 				file := upstream.downloadPackage(pack)
-				log.Debug("Uploading package " + pkgName)
-				packageUpload(target, file, "stable")
-				os.Remove(file)
-			} else {
-				log.Debug("Package exists in target " + pkgName)
+				// log.Debug("Uploading package " + pkgName)
+				// packageUpload(target, file, "stable")
+				files = append(files, file)
 			}
 		}
 
+		log.Debug(fmt.Sprintf("package [%d/%d]", j, len(pkgDatas)))
 		pack := upstream.fetchPackage(p)
 		pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
-		if !target.packageExists(pack.Ident) {
-			log.Debug(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
-			file := upstream.downloadPackage(pack)
-			log.Debug("Uploading package " + pkgName)
-			packageUpload(target, file, "stable")
-			os.Remove(file)
-		} else {
-			log.Debug("Package exists in target " + pkgName)
-		}
+		log.Debug(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
+		file := upstream.downloadPackage(pack)
+		log.Debug("Uploading package " + pkgName)
+		packageUpload(target, file, "stable")
+		files = append(files, file)
 
+		for _, file := range files {
+			log.Debug("Removing file ", file)
+			os.Remove(file)
+		}
 		// wg.Done()
 		// }(&wg)
 	}
