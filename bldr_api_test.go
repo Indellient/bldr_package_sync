@@ -6,18 +6,38 @@ import (
 	"testing"
 )
 
-// func TestListPackages(t *testing.T) {
-// 	api := BldrApi{Url: "https://bldr.habitat.sh"}
-// 	pkgs := api.listAllPackages("core", "stable")
+func TestListPackagesAndDeps(t *testing.T) {
+	api := BldrApi{Url: "https://bldr.habitat.sh"}
+	pkgs := api.listAllPackages("skylerto", "stable")
 
-// 	if len(pkgs.Data) <= 0 {
-// 		t.Error("Fetching Packages returned an slice <= 0")
-// 	}
+	if len(pkgs.Data) <= 0 {
+		t.Error("Fetching Packages returned an slice <= 0")
+	}
 
-// 	if len(pkgs.Data) < 4737 {
-// 		t.Error("Fetching All Packages failed, highly doubt packages from core were deleted")
-// 	}
-// }
+	if len(pkgs.Data) < 4737 {
+		t.Error("Fetching All Packages failed, highly doubt packages from core were deleted")
+	}
+
+	for _, p := range pkgs.Data {
+		deps := api.fetchPackageDeps(p)
+		if len(deps) <= 0 {
+			t.Error("Fetching Packages returned an slice <= 0")
+		}
+	}
+}
+
+func TestListPackages(t *testing.T) {
+	api := BldrApi{Url: "https://bldr.habitat.sh"}
+	pkgs := api.listAllPackages("core", "stable")
+
+	if len(pkgs.Data) <= 0 {
+		t.Error("Fetching Packages returned an slice <= 0")
+	}
+
+	if len(pkgs.Data) < 4737 {
+		t.Error("Fetching All Packages failed, highly doubt packages from core were deleted")
+	}
+}
 
 func TestFetchPackageDeps(t *testing.T) {
 	api := BldrApi{Url: "https://bldr.habitat.sh"}
@@ -28,7 +48,6 @@ func TestFetchPackageDeps(t *testing.T) {
 	if len(pkg) <= 0 {
 		t.Error("Error fetching package info")
 	}
-
 }
 
 func TestFetchPackageData(t *testing.T) {

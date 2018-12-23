@@ -8,6 +8,19 @@ import (
 	"os/exec"
 )
 
+// ${_HAB} pkg upload --url "${local_depot_url}" --channel "${channel}" "${hartfile_path}" && break
+
+func packageUpload(target BldrApi, fileName string, channel string) {
+	// env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "HAB_CACHE_KEY_PATH=" + dir, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
+	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
+
+	cmd := fmt.Sprintf("pkg upload --channel \"%s\" %s", channel, fileName)
+
+	log.Debug("Running `hab " + cmd + "`")
+
+	runHabCommandEnv(cmd, env)
+}
+
 func importPublicKey(target BldrApi, dir string, fileName string) {
 	// env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "HAB_CACHE_KEY_PATH=" + dir, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
 	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
