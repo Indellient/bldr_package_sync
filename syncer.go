@@ -92,11 +92,14 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 
 func (syncer Syncer) run() error {
 	for _, origin := range syncer.config.Origins {
-		syncer.syncKeys(origin, syncer.config.Upstream, syncer.config.Target)
+		syncer.syncKeys(origin.Name, syncer.config.Upstream, syncer.config.Target)
 	}
 
 	for _, origin := range syncer.config.Origins {
-		syncer.syncPackages(origin, "stable", syncer.config.Upstream, syncer.config.Target)
+		for _, channel := range origin.Channels {
+			log.Info(fmt.Sprintf("Syncing packages for %s on channel %s", origin.Name, channel))
+			syncer.syncPackages(origin.Name, channel, syncer.config.Upstream, syncer.config.Target)
+		}
 	}
 
 	return nil

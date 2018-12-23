@@ -1,10 +1,16 @@
 interval = 300
 
-origins = ["habitat"]
-
 [upstream]
 url = "https://bldr.habitat.sh"
 
 [target]
 url = "https://bldr.bluepipeline.io"
 authToken = "_Qk9YLTEKYmxkci0yMDE4MTAxMDE3NTQyMwpibGRyLTIwMTgxMDEwMTc1NDIzCm4raHdxc2RFdVE1UUpBbks1N2lkUmpkby8vd2FqaHZWClNERHVIQ1hxb0J6UG8zTmtmMWNzanFnODA4UXRtaEdCbTZKZmtlNW11dlhzV2ZNZw=="
+
+[[origin]]
+name = "core"
+channels = ["stable"]
+
+[[origin]]
+name = "habitat"
+channels = ["stable"]

@@ -1,0 +1,9 @@
+interval = {{cfg.interval}}
+
+origins = ["core", "habitat"]
+
+[upstream]
+{{toToml cfg.upstream}}
+
+[target]
+{{toToml cfg.target}}

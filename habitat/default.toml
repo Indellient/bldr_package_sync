@@ -1,0 +1,10 @@
+interval = 300
+
+origins = ["core", "habitat"]
+
+[upstream]
+url = "https://bldr.habitat.sh"
+
+[target]
+url = ""
+authToken = ""
