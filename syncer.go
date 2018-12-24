@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"sync"
+	"time"
 )
 
 type Syncer struct {
@@ -109,15 +110,19 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 }
 
 func (syncer Syncer) run() error {
-	for _, origin := range syncer.config.Origins {
-		syncer.syncKeys(origin.Name, syncer.config.Upstream, syncer.config.Target)
-	}
-
-	for _, origin := range syncer.config.Origins {
-		for _, channel := range origin.Channels {
-			log.Info(fmt.Sprintf("Syncing packages for %s on channel %s", origin.Name, channel))
-			syncer.syncPackages(origin.Name, channel, syncer.config.Upstream, syncer.config.Target)
+	for {
+		for _, origin := range syncer.config.Origins {
+			syncer.syncKeys(origin.Name, syncer.config.Upstream, syncer.config.Target)
 		}
+
+		for _, origin := range syncer.config.Origins {
+			for _, channel := range origin.Channels {
+				log.Info(fmt.Sprintf("Syncing packages for %s on channel %s", origin.Name, channel))
+				syncer.syncPackages(origin.Name, channel, syncer.config.Upstream, syncer.config.Target)
+			}
+		}
+		log.Info(fmt.Sprintf("Sleeping for %s seconds", config.Interval))
+		time.Sleep(time.Duration(config.Interval) * time.Second)
 	}
 
 	return nil
