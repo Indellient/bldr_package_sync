@@ -19,32 +19,30 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
+var config Config
+
 func main() {
+	var configFile string
 	app := cli.NewApp()
 	app.Name = "bldr_package_sync"
 	app.Usage = "CLI Application to manage the sync process from upstream habitat builders"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "config, c",
-			Usage: "Load configuration from `FILE`",
+			Name:        "config, c",
+			Usage:       "Load configuration from `FILE`",
+			Destination: &configFile,
+			Value:       "./config.toml",
 		},
 	}
 
 	app.Commands = []cli.Command{
 		{
 			Name:    "sync",
-			Aliases: []string{"c"},
+			Aliases: []string{"s"},
 			Usage:   "Run the upstream sync process",
 			Action: func(c *cli.Context) error {
-				var configFile string
-				if c.String("config") != "" {
-					configFile = c.String("config")
-				} else {
-					configFile = "./config.toml"
-				}
 				log.Debug("Launching the sync process with config file: " + configFile)
-				var config Config
 				if _, err := toml.DecodeFile(configFile, &config); err != nil {
 					log.Error(err)
 					return err

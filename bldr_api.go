@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/BurntSushi/toml"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -63,9 +62,6 @@ type Package struct {
 
 func (api BldrApi) downloadPackage(pack Package) string {
 
-	// hartfile_url="${upstream_depot_url}/v1/depot/pkgs/${p}/download?target=${target}"
-	// ${_CURL} -s -H "${header}" -o "${hartfile_path}" "${hartfile_url}" && break
-
 	pkg := pack.Ident
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s/download?target=%s", api.Url, pkgName, pack.Target)
@@ -88,9 +84,6 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	}
 	defer out.Close()
 
-	// Get the data
-	// resp, err := http.Get(url)
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Error(err)
@@ -100,7 +93,6 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	if err != nil {
 		log.Error(err)
 	}
-	// defer resp.Body.Close()
 
 	if resp.StatusCode > BAD_CODE {
 		log.Error("Incorrect response code returned ", resp.StatusCode)
@@ -120,25 +112,8 @@ func (api BldrApi) downloadPackage(pack Package) string {
 // Therefore we should never include the package we're dealing with
 // in its tdeps array
 func (api BldrApi) fetchPackageDeps(pkg PackageData) []PackageData {
-	// var pkgs []PackageData
 
 	data := api.fetchPackage(pkg)
-
-	// if len(data.TDeps) <= 0 {
-	// 	return pkgs
-	// }
-
-	// tdeps := data.TDeps
-	// deps := append(data.Deps, tdeps...)
-	// for _, p := range deps {
-	// 	if len(pkgs) <= 0 {
-	// 		pkgs = []PackageData{p}
-	// 	}
-	// 	pkgs = append(pkgs, api.fetchPackageDeps(p)...)
-	// }
-
-	// return pkgs
-
 	return data.TDeps
 }
 
@@ -253,7 +228,6 @@ func (api BldrApi) listPackages(origin string, channel string) Packages {
 }
 
 func (api BldrApi) listPackagesRange(origin string, channel string, count int) Packages {
-	// PACKGE_PATH := "/v1/depot/channels/" + origin + "/" + channel + "/pkgs?range=" + count
 	PACKGE_PATH := fmt.Sprintf("/v1/depot/channels/%s/%s/pkgs?range=%d", origin, channel, count)
 
 	url := api.Url + PACKGE_PATH
@@ -379,9 +353,6 @@ func (api BldrApi) uploadOriginKey(filename string, key string, origin string) b
 func packageDifference(upstream []PackageData, target []PackageData) []PackageData {
 	var diff []PackageData
 
-	// Loop two times, first to find slice1 strings not in slice2,
-	// second loop to find slice2 strings not in slice1
-	// for i := 0; i < 1; i++ {
 	for _, s1 := range upstream {
 		found := false
 		for _, s2 := range target {
@@ -394,11 +365,6 @@ func packageDifference(upstream []PackageData, target []PackageData) []PackageDa
 		if !found {
 			diff = append(diff, s1)
 		}
-		// }
-		// Swap the slices, only if it was the first loop
-		// if i == 0 {
-		// 	slice1, slice2 = slice2, slice1
-		// }
 	}
 
 	return diff
@@ -407,9 +373,6 @@ func packageDifference(upstream []PackageData, target []PackageData) []PackageDa
 func difference(upstream []OriginKey, target []OriginKey) []OriginKey {
 	var diff []OriginKey
 
-	// Loop two times, first to find slice1 strings not in slice2,
-	// second loop to find slice2 strings not in slice1
-	// for i := 0; i < 1; i++ {
 	for _, s1 := range upstream {
 		found := false
 		for _, s2 := range target {
@@ -422,11 +385,6 @@ func difference(upstream []OriginKey, target []OriginKey) []OriginKey {
 		if !found {
 			diff = append(diff, s1)
 		}
-		// }
-		// Swap the slices, only if it was the first loop
-		// if i == 0 {
-		// 	slice1, slice2 = slice2, slice1
-		// }
 	}
 
 	return diff
