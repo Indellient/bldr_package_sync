@@ -21,6 +21,8 @@ bldr_package_sync --config user.toml sync
 ## Configuration
 
 * `interval`: integer value used to determine the amount of time to sleep after running the process
+* `env`: additional environment variables to use when shelling out (could be proxy or ssl, see
+  [troubleshooting](#troubleshooting))
 * `upstream`: the bldr to pull packages/keys from
   * `url`: the url to the corresponding upstream
 * `target`: the bldr to push packages/keys to
@@ -35,6 +37,7 @@ bldr_package_sync --config user.toml sync
 
 ```
 interval = 300
+env = []
 
 [upstream]
 url = "https://bldr.habitat.sh"
