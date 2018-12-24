@@ -7,6 +7,8 @@ These values are driven by configuration.
 
 ## Usage
 
+For the preferred usage on the habitat package please review the [Habitat package README](./habitat/README.md)
+
 Currently there is only one mode to execute in, continuity as an agent where the sync process happens followed
 by a sleep and re-execution.
 
