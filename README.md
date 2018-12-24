@@ -5,6 +5,19 @@ builder, to a target builder.
 
 These values are driven by configuration.
 
+## Usage
+
+Currently there is only one mode to execute in, continuity as an agent where the sync process happens followed
+by a sleep and re-execution.
+
+### Example
+
+This will run the sync process with the given configuration file.
+
+```
+bldr_package_sync --config user.toml sync
+```
+
 ## Configuration
 
 * `interval`: integer value used to determine the amount of time to sleep after running the process
