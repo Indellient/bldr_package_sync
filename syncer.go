@@ -70,8 +70,8 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 		packageUpload(target, file, "stable")
 		files = append(files, file)
 
+		log.Info("Cleaning up downloaded files")
 		for _, file := range files {
-			log.Info("Cleaning up downloaded files")
 			log.Debug("Removing file ", file)
 			os.Remove(file)
 		}
