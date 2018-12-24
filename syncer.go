@@ -121,7 +121,7 @@ func (syncer Syncer) run() error {
 				syncer.syncPackages(origin.Name, channel, syncer.config.Upstream, syncer.config.Target)
 			}
 		}
-		log.Info(fmt.Sprintf("Sleeping for %s seconds", config.Interval))
+		log.Info(fmt.Sprintf("Sync process finished, Sleeping for %s seconds", config.Interval))
 		time.Sleep(time.Duration(config.Interval) * time.Second)
 	}
 
