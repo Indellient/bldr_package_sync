@@ -50,7 +50,7 @@ func main() {
 				}
 				logLevel()
 				syncer := Syncer{config: config}
-				log.Info(syncer)
+				log.Debug(syncer)
 				return syncer.run()
 			},
 		},

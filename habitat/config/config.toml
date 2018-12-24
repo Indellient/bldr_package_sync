@@ -1,6 +1,7 @@
 interval = {{cfg.interval}}
-log_level = "info"
-env = []
+log_level = "{{cfg.log_level}}"
+env = {{toToml cfg.env}}
+temp_dir = "{{pkg.svc_data_path}}"
 
 [upstream]
 {{toToml cfg.upstream}}
@@ -8,8 +9,8 @@ env = []
 [target]
 {{toToml cfg.target}}
 
+{{#each cfg.origin as |o| ~}}
 [[origin]]
-name = "core"
-channels = ["stable"]
-
-{{toToml cfg.origin}}
+name = "{{o.name}}"
+channels = {{toToml o.channels}}
+{{/each ~}}

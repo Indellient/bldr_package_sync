@@ -12,3 +12,5 @@ pkg_build_deps=(
   "core/git"
   "core/busybox-static"
 )
+pkg_svc_user="root"
+pkg_svc_group=$pkg_svc_user

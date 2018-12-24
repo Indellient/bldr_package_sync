@@ -21,6 +21,8 @@ bldr_package_sync --config user.toml sync
 ## Configuration
 
 * `interval`: integer value used to determine the amount of time to sleep after running the process
+* `log_level`: the level to print logs at (debug, info, warn, error)
+* `temp_dir`: the temp directory to stage files in
 * `env`: additional environment variables to use when shelling out (could be proxy or ssl, see
   [troubleshooting](#troubleshooting))
 * `upstream`: the bldr to pull packages/keys from
@@ -38,6 +40,8 @@ bldr_package_sync --config user.toml sync
 ```
 interval = 300
 env = []
+log_level = "info"
+temp_dir = "/tmp"
 
 [upstream]
 url = "https://bldr.habitat.sh"

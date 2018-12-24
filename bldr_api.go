@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -68,9 +69,13 @@ func (api BldrApi) downloadPackage(pack Package) string {
 
 	log.Debug("HTTP GET " + url)
 
-	dir := os.TempDir()
+	dir := config.TempDir
+	if config.TempDir == "" {
+		dir = os.TempDir()
+	}
+
 	hartFile := fmt.Sprintf("%s-%s-%s-%s-%s.hart", pkg.Origin, pkg.Name, pkg.Version, pkg.Release, pack.Target)
-	location := dir + hartFile
+	location := filepath.Join(dir, hartFile)
 	log.Debug("Downloading to file ", location)
 
 	client := http.Client{
@@ -335,8 +340,11 @@ func (api BldrApi) fetchKeyData(key OriginKey) string {
 
 func (api BldrApi) uploadOriginKey(filename string, key string, origin string) bool {
 
-	dir := os.TempDir()
-	file := dir + filename
+	dir := config.TempDir
+	if config.TempDir == "" {
+		dir = os.TempDir()
+	}
+	file := filepath.Join(dir, filename)
 
 	if err := ioutil.WriteFile(file, []byte(key), 0777); err != nil {
 		log.Fatal("Failed to write to temporary file", err)

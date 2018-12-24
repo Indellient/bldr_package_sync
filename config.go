@@ -11,6 +11,7 @@ type Origin struct {
 type Config struct {
 	Upstream BldrApi
 	LogLevel string `toml:"log_level"`
+	TempDir  string `toml:"temp_dir"`
 	Target   BldrApi
 	Env      []string
 	Interval int
