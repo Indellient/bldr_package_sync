@@ -114,47 +114,32 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	}
 
 	return location
-
-	// req, err := http.NewRequest(http.MethodGet, url, nil)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// res, getErr := client.Do(req)
-	// if getErr != nil {
-	// 	log.Fatal(getErr)
-	// }
-
-	// body, readErr := ioutil.ReadAll(res.Body)
-	// if readErr != nil {
-	// 	log.Fatal(readErr)
-	// }
-
-	// return string(body)
 }
 
 // Package dependencies are allows in the stable channel
 // Therefore we should never include the package we're dealing with
 // in its tdeps array
 func (api BldrApi) fetchPackageDeps(pkg PackageData) []PackageData {
-	var pkgs []PackageData
+	// var pkgs []PackageData
 
 	data := api.fetchPackage(pkg)
 
-	if len(data.TDeps) <= 0 {
-		return pkgs
-	}
+	// if len(data.TDeps) <= 0 {
+	// 	return pkgs
+	// }
 
-	tdeps := data.TDeps
-	deps := append(data.Deps, tdeps...)
-	for _, p := range deps {
-		if len(pkgs) <= 0 {
-			pkgs = []PackageData{p}
-		}
-		pkgs = append(pkgs, api.fetchPackageDeps(p)...)
-	}
+	// tdeps := data.TDeps
+	// deps := append(data.Deps, tdeps...)
+	// for _, p := range deps {
+	// 	if len(pkgs) <= 0 {
+	// 		pkgs = []PackageData{p}
+	// 	}
+	// 	pkgs = append(pkgs, api.fetchPackageDeps(p)...)
+	// }
 
-	return pkgs
+	// return pkgs
+
+	return data.TDeps
 }
 
 func (api BldrApi) packageExists(pkg PackageData) bool {

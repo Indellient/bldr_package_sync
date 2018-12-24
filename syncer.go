@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
-	// "sync"
+	"sync"
 )
 
 type Syncer struct {
@@ -81,12 +81,21 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	keys := difference(upstreamKeys, targetKeys)
 	log.Debug("Uploading diffed keys")
 	log.Debug(keys)
+
+	var wg sync.WaitGroup
 	for _, key := range keys {
-		data := upstream.fetchKeyData(key)
-		log.Debug(data)
-		fileName := key.Origin + "-" + key.Revision + ".pub"
-		target.uploadOriginKey(fileName, data, key.Origin)
+		// Sync Keys multi-threaded
+		go func(wg *sync.WaitGroup) {
+			data := upstream.fetchKeyData(key)
+			log.Debug(data)
+			fileName := key.Origin + "-" + key.Revision + ".pub"
+			target.uploadOriginKey(fileName, data, key.Origin)
+
+			wg.Done()
+		}(&wg)
 	}
+
+	wg.Wait()
 	return true
 }
 
