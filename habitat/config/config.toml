@@ -1,9 +1,15 @@
 interval = {{cfg.interval}}
-
-origins = ["core", "habitat"]
+log_level = "info"
+env = []
 
 [upstream]
 {{toToml cfg.upstream}}
 
 [target]
 {{toToml cfg.target}}
+
+[[origin]]
+name = "core"
+channels = ["stable"]
+
+{{toToml cfg.origin}}
