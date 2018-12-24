@@ -10,6 +10,7 @@ type Origin struct {
 // Structure of a configuration file.
 type Config struct {
 	Upstream BldrApi
+	LogLevel string `toml:"log_level"`
 	Target   BldrApi
 	Env      []string
 	Interval int

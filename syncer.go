@@ -13,23 +13,32 @@ type Syncer struct {
 }
 
 func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrApi, target BldrApi) bool {
-	log.Debug("Beginning the package sync process")
+	log.Info("Beginning the package sync process")
 
-	upstreamPkgs := upstream.listAllPackages(origin, channel)
-	log.Debug(fmt.Sprintf("Found %d packages on %s", len(upstreamPkgs.Data), upstream.Url))
+	upstreamPkgsChan := make(chan Packages)
+	go func() {
+		pkgs := upstream.listAllPackages(origin, channel)
+		log.Info(fmt.Sprintf("Found %d packages on %s", len(pkgs.Data), upstream.Url))
+		upstreamPkgsChan <- pkgs
+	}()
 
-	targetPkgs := target.listAllPackages(origin, channel)
-	log.Debug(fmt.Sprintf("Found %d packages on %s", len(targetPkgs.Data), target.Url))
+	targetPkgsChan := make(chan Packages)
+	go func() {
+		targetPkgs := target.listAllPackages(origin, channel)
+		log.Info(fmt.Sprintf("Found %d packages on %s", len(targetPkgs.Data), target.Url))
+		targetPkgsChan <- targetPkgs
+	}()
+
+	upstreamPkgs := <-upstreamPkgsChan
+	targetPkgs := <-targetPkgsChan
 
 	// Good enough to figure out the difference before calculating deps
 	pkgDatas := packageDifference(upstreamPkgs.Data, targetPkgs.Data)
 
-	log.Debug(fmt.Sprintf("Determining TDEPS for %d packages", len(pkgDatas)))
+	log.Info(fmt.Sprintf("Determining TDEPS for %d packages", len(pkgDatas)))
 
-	for i := len(pkgDatas)/2 - 1; i >= 0; i-- {
-		opp := len(pkgDatas) - 1 - i
-		pkgDatas[i], pkgDatas[opp] = pkgDatas[opp], pkgDatas[i]
-	}
+	// Currently adding multi-thread support for syncing packages pounds both upstream and target
+	// APIs, typically resulting in Fatal API calls.
 
 	// var wg sync.WaitGroup
 	for j, p := range pkgDatas {
@@ -55,7 +64,7 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 		log.Info(fmt.Sprintf("package [%d/%d]", j, len(pkgDatas)))
 		pack := upstream.fetchPackage(p)
 		pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
-		log.Debug(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
+		log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
 		file := upstream.downloadPackage(pack)
 		log.Info("Uploading package " + pkgName)
 		packageUpload(target, file, "stable")
@@ -75,7 +84,7 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 }
 
 func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) bool {
-	log.Debug("Beginning the key sync process")
+	log.Info("Beginning the key sync process")
 	upstreamKeys := upstream.fetchKeyPaths(origin)
 	targetKeys := target.fetchKeyPaths(origin)
 	keys := difference(upstreamKeys, targetKeys)

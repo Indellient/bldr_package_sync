@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
+	"strings"
 )
 
 func init() {
@@ -42,12 +43,12 @@ func main() {
 			Aliases: []string{"s"},
 			Usage:   "Run the upstream sync process",
 			Action: func(c *cli.Context) error {
-				log.Debug("Launching the sync process with config file: " + configFile)
+				log.Info("Launching the sync process with config file: " + configFile)
 				if _, err := toml.DecodeFile(configFile, &config); err != nil {
 					log.Error(err)
 					return err
 				}
-				log.Info(config)
+				logLevel()
 				syncer := Syncer{config: config}
 				log.Info(syncer)
 				return syncer.run()
@@ -58,5 +59,23 @@ func main() {
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func logLevel() {
+
+	switch strings.ToLower(config.LogLevel) {
+	// case "trace":
+	// 	log.SetLevel(log.TraceLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
 	}
 }
