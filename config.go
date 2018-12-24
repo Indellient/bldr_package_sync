@@ -1,8 +1,19 @@
 package main
 
+// A Definition of a habitat origin as interpreted from
+// configuration files.
+type Origin struct {
+	Name     string   `toml:"name"`
+	Channels []string `toml:"channels"`
+}
+
+// Structure of a configuration file.
 type Config struct {
 	Upstream BldrApi
+	LogLevel string `toml:"log_level"`
+	TempDir  string `toml:"temp_dir"`
 	Target   BldrApi
+	Env      []string
 	Interval int
-	Origins  []string
+	Origins  []Origin `toml:"origin"`
 }

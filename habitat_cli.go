@@ -8,9 +8,18 @@ import (
 	"os/exec"
 )
 
+func packageUpload(target BldrApi, fileName string, channel string) {
+	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken}
+
+	cmd := fmt.Sprintf("pkg upload --channel \"%s\" %s", channel, fileName)
+
+	log.Debug("Running `hab " + cmd + "`")
+
+	runHabCommandEnv(cmd, env)
+}
+
 func importPublicKey(target BldrApi, dir string, fileName string) {
-	// env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "HAB_CACHE_KEY_PATH=" + dir, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
-	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken, "SSL_CERT_FILE=/usr/local/etc/openssl/cert.pem"}
+	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken}
 
 	cmd := fmt.Sprintf("origin key upload --pubfile \"%s\"", fileName)
 
@@ -53,7 +62,11 @@ func runHabCommandEnv(command string, habEnv []string) {
 	cmd := exec.Command("/bin/bash", "-c", command)
 	path := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	cmd.Env = append(cmd.Env, path)
+
+	habEnv = append(habEnv, config.Env...)
 	cmd.Env = append(cmd.Env, habEnv...)
+
+	log.Debug(fmt.Sprintf("Running with Hab Environment Variables %s", habEnv))
 
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()

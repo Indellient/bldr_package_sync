@@ -1,0 +1,16 @@
+interval = {{cfg.interval}}
+log_level = "{{cfg.log_level}}"
+env = {{toToml cfg.env}}
+temp_dir = "{{pkg.svc_data_path}}"
+
+[upstream]
+{{toToml cfg.upstream}}
+
+[target]
+{{toToml cfg.target}}
+
+{{#each cfg.origin as |o| ~}}
+[[origin]]
+name = "{{o.name}}"
+channels = {{toToml o.channels}}
+{{/each ~}}

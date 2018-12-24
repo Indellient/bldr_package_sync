@@ -1,4 +1,5 @@
 interval = 300
+log_level = "info"
 env = []
 
 [upstream]
@@ -7,10 +8,6 @@ url = "https://bldr.habitat.sh"
 [target]
 url = ""
 authToken = ""
-
-[[origin]]
-name = "habitat"
-channels = ["stable", "on-prem-stable"]
 
 [[origin]]
 name = "core"
