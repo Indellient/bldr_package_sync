@@ -8,7 +8,7 @@ import (
 
 var SLEEP_TIME = 0
 
-// Performs an HTTP GET Method
+// Implement status codes: https://golang.org/src/net/http/status.go
 func performGetRequest(url string) *http.Response {
 
 	res := getRequest(url)
@@ -27,6 +27,7 @@ func performGetRequest(url string) *http.Response {
 	return res
 }
 
+// Performs an HTTP GET Method
 func getRequest(url string) *http.Response {
 
 	log.Debug("HTTP GET " + url)
