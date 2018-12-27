@@ -67,8 +67,12 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 		pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
 		log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
 		file := upstream.downloadPackage(pack)
-		log.Info("Uploading package " + pkgName)
-		packageUpload(target, file, "stable")
+		log.Infof("Uploading package %s to channel %s", pkgName, channel)
+		packageUpload(target, file, channel)
+
+		// This is a safe guard, sometimes bad things happen on upload where we cannot sync the package to
+		// a channel. This will ensure the promotion is atleast attempted.
+		packagePromote(target, pkgName, channel)
 		files = append(files, file)
 
 		log.Info("Cleaning up downloaded files")
@@ -121,7 +125,7 @@ func (syncer Syncer) run() error {
 				syncer.syncPackages(origin.Name, channel, syncer.config.Upstream, syncer.config.Target)
 			}
 		}
-		log.Info(fmt.Sprintf("Sync process finished, Sleeping for %s seconds", config.Interval))
+		log.Info(fmt.Sprintf("Sync process finished, Sleeping for %d seconds", config.Interval))
 		time.Sleep(time.Duration(config.Interval) * time.Second)
 	}
 

@@ -18,6 +18,16 @@ func packageUpload(target BldrApi, fileName string, channel string) {
 	runHabCommandEnv(cmd, env)
 }
 
+func packagePromote(target BldrApi, pkgName string, channel string) {
+	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken}
+
+	cmd := fmt.Sprintf("pkg promote \"%s\" %s", pkgName, channel)
+
+	log.Debug("Running `hab " + cmd + "`")
+
+	runHabCommandEnv(cmd, env)
+}
+
 func importPublicKey(target BldrApi, dir string, fileName string) {
 	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken}
 
