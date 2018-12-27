@@ -67,8 +67,6 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s/download?target=%s", api.Url, pkgName, pack.Target)
 
-	log.Debug("HTTP GET " + url)
-
 	dir := config.TempDir
 	if config.TempDir == "" {
 		dir = os.TempDir()
@@ -78,10 +76,6 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	location := filepath.Join(dir, hartFile)
 	log.Debug("Downloading to file ", location)
 
-	client := http.Client{
-		Timeout: time.Second * 300,
-	}
-
 	// Create the file
 	out, err := os.Create(location)
 	if err != nil {
@@ -89,21 +83,7 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	}
 	defer out.Close()
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Error(err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Error(err)
-	}
-
-	if resp.StatusCode > BAD_CODE {
-		log.Error("Incorrect response code returned ", resp.StatusCode)
-		return ""
-	}
-
+	resp := performGetRequest(url)
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
@@ -126,8 +106,6 @@ func (api BldrApi) packageExists(pkg PackageData) bool {
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s", api.Url, pkgName)
-
-	log.Debug("HTTP GET " + url)
 
 	client := http.Client{
 		Timeout: time.Second * 30, // Maximum of 30 secs
@@ -153,21 +131,7 @@ func (api BldrApi) fetchPackage(pkg PackageData) Package {
 
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s", api.Url, pkgName)
 
-	log.Debug("HTTP GET " + url)
-
-	client := http.Client{
-		Timeout: time.Second * 30, // Maximum of 30 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
+	res := performGetRequest(url)
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -197,26 +161,7 @@ func (api BldrApi) listPackages(origin string, channel string) Packages {
 	PACKGE_PATH := "/v1/depot/channels/" + origin + "/" + channel + "/pkgs"
 
 	url := api.Url + PACKGE_PATH
-	log.Debug("HTTP GET " + url)
-
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-
-	if res.StatusCode > BAD_CODE {
-		log.Error("Incorrect response code returned ", res.StatusCode)
-		return Packages{}
-	}
+	res := performGetRequest(url)
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -236,26 +181,7 @@ func (api BldrApi) listPackagesRange(origin string, channel string, count int) P
 	PACKGE_PATH := fmt.Sprintf("/v1/depot/channels/%s/%s/pkgs?range=%d", origin, channel, count)
 
 	url := api.Url + PACKGE_PATH
-	log.Debug("HTTP GET " + url)
-
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-
-	if res.StatusCode > BAD_CODE {
-		log.Error("Incorrect response code returned ", res.StatusCode)
-		return Packages{}
-	}
+	res := performGetRequest(url)
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -275,26 +201,7 @@ func (api BldrApi) fetchKeyPaths(origin string) []OriginKey {
 	KEY_PATH := "/v1/depot/origins/" + origin + "/keys"
 
 	url := api.Url + KEY_PATH
-	log.Debug("HTTP GET " + url)
-
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-
-	if res.StatusCode > BAD_CODE {
-		log.Error("Incorrect response code returned ", res.StatusCode)
-		return []OriginKey{}
-	}
+	res := performGetRequest(url)
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -311,30 +218,11 @@ func (api BldrApi) fetchKeyPaths(origin string) []OriginKey {
 }
 
 func (api BldrApi) fetchKeyData(key OriginKey) string {
-	KEY_PATH := "/v1/depot" + key.Location
-
-	url := api.Url + KEY_PATH
-	log.Debug("HTTP GET " + url)
-
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-
+	res := performGetRequest(api.Url + "/v1/depot" + key.Location)
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
 		log.Fatal(readErr)
 	}
-
 	return string(body)
 }
 
