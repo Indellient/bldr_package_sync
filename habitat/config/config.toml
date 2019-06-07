@@ -2,6 +2,7 @@ interval = {{cfg.interval}}
 log_level = "{{cfg.log_level}}"
 env = {{toToml cfg.env}}
 temp_dir = "{{pkg.svc_data_path}}"
+features = {{toToml cfg.features}}
 
 [upstream]
 {{toToml cfg.upstream}}
@@ -13,4 +14,10 @@ temp_dir = "{{pkg.svc_data_path}}"
 [[origin]]
 name = "{{o.name}}"
 channels = {{toToml o.channels}}
+{{/each ~}}
+
+{{#each cfg.package as |p| ~}}
+[[package]]
+name = "{{p.name}}"
+constraint = {{toToml p.constraint}}
 {{/each ~}}

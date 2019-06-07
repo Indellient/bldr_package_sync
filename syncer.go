@@ -3,12 +3,14 @@ package main
 import (
 	// "github.com/BurntSushi/toml"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
+// Syncer holds the configuration values for the sync
 type Syncer struct {
 	config Config
 }
@@ -53,10 +55,24 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 
 			log.Info(fmt.Sprintf("Dependancy [%d/%d] %s", i+1, len(deps), pkgName))
 			if !target.packageExists(pkg) {
-				pack := upstream.fetchPackage(pkg)
-				log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
-				file := upstream.downloadPackage(pack)
-				files = append(files, file)
+
+				// if package feature enabled check package match, then version match
+				if syncer.config.PackageContraintEnabled() {
+					log.Info("Validating package against contraints")
+					// Check if pkg exists in the PackageConstraints array
+					if syncer.config.ValidatePackageContraint(pkg) {
+						pack := upstream.fetchPackage(pkg)
+						log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
+						file := upstream.downloadPackage(pack)
+						files = append(files, file)
+					}
+				} else {
+					pack := upstream.fetchPackage(pkg)
+					log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
+					file := upstream.downloadPackage(pack)
+					files = append(files, file)
+				}
+
 			} else {
 				log.Info(fmt.Sprintf("Dependancy %s exists in target, skipping download", pkgName))
 			}
@@ -99,6 +115,7 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	var wg sync.WaitGroup
 	for _, key := range keys {
 		// Sync Keys multi-threaded
+		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			data := upstream.fetchKeyData(key)
 			log.Debug(data)

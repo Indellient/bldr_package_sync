@@ -3,14 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
+
+	version "github.com/hashicorp/go-version"
+	log "github.com/sirupsen/logrus"
 )
 
 const BAD_CODE = 300
@@ -97,7 +100,6 @@ func (api BldrApi) downloadPackage(pack Package) string {
 // Therefore we should never include the package we're dealing with
 // in its tdeps array
 func (api BldrApi) fetchPackageDeps(pkg PackageData) []PackageData {
-
 	data := api.fetchPackage(pkg)
 	return data.TDeps
 }
@@ -284,4 +286,57 @@ func difference(upstream []OriginKey, target []OriginKey) []OriginKey {
 	}
 
 	return diff
+}
+
+func NewPackageData(data string) PackageData {
+	var packageData PackageData
+	identArray := strings.Split(data, "/")
+	for i := 0; i < len(identArray); i++ {
+		if i == 0 {
+			packageData.Origin = identArray[0]
+		}
+
+		if i == 1 {
+			packageData.Name = identArray[1]
+		}
+
+		if i == 2 {
+			packageData.Version = identArray[2]
+		}
+
+		if i == 3 {
+			packageData.Release = identArray[3]
+		}
+	}
+	return packageData
+}
+
+// MatchesVersion matches based on the following contraints
+// "":   constraintEqual,
+// "=":  constraintEqual,
+// "!=": constraintNotEqual,
+// ">":  constraintGreaterThan,
+// "<":  constraintLessThan,
+// ">=": constraintGreaterThanEqual,
+// "<=": constraintLessThanEqual,
+// "~>": constraintPessimistic,
+func (packageData PackageData) MatchesVersion(constraint string) bool {
+	v1, err := version.NewVersion(packageData.Version)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	constraints, err := version.NewConstraint(constraint)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	log.WithFields(log.Fields{
+		"version":    v1,
+		"constraint": constraint,
+		"statisfies": constraints.Check(v1),
+	}).Debugf("Checking Version Contraint %s %s", v1, constraint)
+	return constraints.Check(v1)
 }
