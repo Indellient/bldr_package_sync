@@ -7,6 +7,7 @@ scaffolding_go_build_deps=(
   "github.com/sirupsen/logrus"
   "github.com/BurntSushi/toml"
   "github.com/urfave/cli"
+  "github.com/hashicorp/go-version"
 )
 pkg_build_deps=(
   "core/git"

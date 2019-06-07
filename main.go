@@ -1,11 +1,12 @@
 package main
 
 import (
+	"os"
+	"strings"
+
 	"github.com/BurntSushi/toml"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"os"
-	"strings"
 )
 
 func init() {
@@ -49,6 +50,7 @@ func main() {
 					return err
 				}
 				logLevel()
+				log.Debugf("Using configuration: %v", config)
 				syncer := Syncer{config: config}
 				log.Debug(syncer)
 				return syncer.run()

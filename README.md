@@ -27,6 +27,8 @@ bldr_package_sync --config user.toml sync
 * `temp_dir`: the temp directory to stage files in
 * `env`: additional environment variables to use when shelling out (could be proxy or ssl, see
   [troubleshooting](#troubleshooting))
+* `features`: list of beta features to include
+  * options: `PACKAGE_CONSTRAINTS`
 * `upstream`: the bldr to pull packages/keys from
   * `url`: the url to the corresponding upstream
 * `target`: the bldr to push packages/keys to
@@ -36,6 +38,9 @@ bldr_package_sync --config user.toml sync
 * `origin`: list of origins and channels to pull packages from
   * `name`: the name of the origin
   * `channels`: a list of channels to pull/push packages to
+* `package`: list of package constraints (this feature is beta)
+  * `name`: the name of the origin
+  * `contraint`: the constraint on the package
 
 ### Full Example
 
@@ -59,6 +64,39 @@ channels = ["stable", "on-prem-stable"]
 [[origin]]
 name = "core"
 channels = ["stable"]
+```
+
+#### Package Contraints (Beta)
+
+```
+interval = 300
+env = []
+log_level = "info"
+temp_dir = "/tmp"
+features = ["PACKAGE_CONSTRAINTS"]
+
+[upstream]
+url = "https://bldr.habitat.sh"
+
+[target]
+url = ""
+authToken = ""
+
+[[origin]]
+name = "habitat"
+channels = ["stable", "on-prem-stable"]
+
+[[origin]]
+name = "core"
+channels = ["stable"]
+
+[[package]]
+name = "core/hab"
+constraint = "< 0.80.0"
+
+[[package]]
+name = "core/hab-pkg-export-docker"
+constraint = "< 0.80.0"
 ```
 
 ## Troubleshooting
