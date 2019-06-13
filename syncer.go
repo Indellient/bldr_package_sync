@@ -42,65 +42,21 @@ func (syncer Syncer) syncPackages(origin string, channel string, upstream BldrAp
 
 	// Currently adding multi-thread support for syncing packages pounds both upstream and target
 	// APIs, typically resulting in Fatal API calls.
-
-	// var wg sync.WaitGroup
 	for j, p := range pkgDatas {
-		// wg.Add(1)
-		// go func(wg *sync.WaitGroup) {
-		files := []string{}
-		deps := upstream.fetchPackageDeps(p)
-		log.Info(fmt.Sprintf("Determined deps %s", deps))
-		for i, pkg := range deps {
-			pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 
-			log.Info(fmt.Sprintf("Dependancy [%d/%d] %s", i+1, len(deps), pkgName))
-			if !target.packageExists(pkg) {
-
-				// if package feature enabled check package match, then version match
-				if syncer.config.PackageContraintEnabled() {
-					log.Info("Validating package against contraints")
-					// Check if pkg exists in the PackageConstraints array
-					if syncer.config.ValidatePackageContraint(pkg) {
-						pack := upstream.fetchPackage(pkg)
-						log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
-						file := upstream.downloadPackage(pack)
-						files = append(files, file)
-					}
-				} else {
-					pack := upstream.fetchPackage(pkg)
-					log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
-					file := upstream.downloadPackage(pack)
-					files = append(files, file)
-				}
-
-			} else {
-				log.Info(fmt.Sprintf("Dependancy %s exists in target, skipping download", pkgName))
+		if syncer.config.PackageContraintEnabled() {
+			log.Info("Validating package against contraints")
+			if syncer.config.ValidatePackageContraint(p) {
+				log.Info(fmt.Sprintf("package [%d/%d]", j, len(pkgDatas)))
+				syncer.syncPackage(upstream, target, p, channel)
 			}
+		} else {
+			log.Info(fmt.Sprintf("package [%d/%d]", j, len(pkgDatas)))
+			syncer.syncPackage(upstream, target, p, channel)
 		}
 
-		log.Info(fmt.Sprintf("package [%d/%d]", j, len(pkgDatas)))
-		pack := upstream.fetchPackage(p)
-		pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
-		log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
-		file := upstream.downloadPackage(pack)
-		log.Infof("Uploading package %s to channel %s", pkgName, channel)
-		packageUpload(target, file, channel)
-
-		// This is a safe guard, sometimes bad things happen on upload where we cannot sync the package to
-		// a channel. This will ensure the promotion is atleast attempted.
-		packagePromote(target, pkgName, channel)
-		files = append(files, file)
-
-		log.Info("Cleaning up downloaded files")
-		for _, file := range files {
-			log.Debug("Removing file ", file)
-			os.Remove(file)
-		}
-		// wg.Done()
-		// }(&wg)
 	}
 
-	// wg.Wait()
 	return true
 }
 
@@ -145,6 +101,41 @@ func (syncer Syncer) run() error {
 		log.Info(fmt.Sprintf("Sync process finished, Sleeping for %d seconds", config.Interval))
 		time.Sleep(time.Duration(config.Interval) * time.Second)
 	}
+}
 
-	return nil
+func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData, channel string) {
+	files := []string{}
+	deps := upstream.fetchPackageDeps(p)
+	log.Info(fmt.Sprintf("Determined deps %s", deps))
+	for i, pkg := range deps {
+		pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
+
+		log.Info(fmt.Sprintf("Dependancy [%d/%d] %s", i+1, len(deps), pkgName))
+		if !target.packageExists(pkg) {
+			pack := upstream.fetchPackage(pkg)
+			log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
+			file := upstream.downloadPackage(pack)
+			files = append(files, file)
+		} else {
+			log.Info(fmt.Sprintf("Dependancy %s exists in target, skipping download", pkgName))
+		}
+	}
+
+	pack := upstream.fetchPackage(p)
+	pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
+	log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
+	file := upstream.downloadPackage(pack)
+	log.Infof("Uploading package %s to channel %s", pkgName, channel)
+	packageUpload(target, file, channel)
+
+	// This is a safe guard, sometimes bad things happen on upload where we cannot sync the package to
+	// a channel. This will ensure the promotion is atleast attempted.
+	packagePromote(target, pkgName, channel)
+	files = append(files, file)
+
+	log.Info("Cleaning up downloaded files")
+	for _, file := range files {
+		log.Debug("Removing file ", file)
+		os.Remove(file)
+	}
 }
