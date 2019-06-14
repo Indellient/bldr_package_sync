@@ -1,14 +1,30 @@
+{{#if cfg.interval ~}}
 interval = {{cfg.interval}}
-log_level = "{{cfg.log_level}}"
-env = {{toToml cfg.env}}
-temp_dir = "{{pkg.svc_data_path}}"
-features = {{toToml cfg.features}}
+{{/if ~}}
 
+{{#if cfg.log_level ~}}
+log_level = "{{cfg.log_level}}"
+{{/if ~}}
+
+{{#if cfg.env ~}}
+env = {{toToml cfg.env}}
+{{/if ~}}
+
+temp_dir = "{{pkg.svc_data_path}}"
+
+{{#if cfg.features ~}}
+features = {{toToml cfg.features}}
+{{/if ~}}
+
+{{#if cfg.upstream ~}}
 [upstream]
 {{toToml cfg.upstream}}
+{{/if ~}}
 
+{{#if cfg.target ~}}
 [target]
 {{toToml cfg.target}}
+{{/if ~}}
 
 {{#each cfg.origin as |o| ~}}
 [[origin]]
