@@ -99,9 +99,12 @@ func (api BldrApi) downloadPackage(pack Package) string {
 // Package dependencies are allows in the stable channel
 // Therefore we should never include the package we're dealing with
 // in its tdeps array
-func (api BldrApi) fetchPackageDeps(pkg PackageData) []PackageData {
-	data := api.fetchPackage(pkg)
-	return data.TDeps
+func (api BldrApi) fetchPackageDeps(pkg PackageData) ([]PackageData, error) {
+	data, err := api.fetchPackage(pkg)
+	if err != nil {
+		return []PackageData{}, err
+	}
+	return data.TDeps, nil
 }
 
 func (api BldrApi) packageExists(pkg PackageData) bool {
@@ -127,7 +130,7 @@ func (api BldrApi) packageExists(pkg PackageData) bool {
 
 }
 
-func (api BldrApi) fetchPackage(pkg PackageData) Package {
+func (api BldrApi) fetchPackage(pkg PackageData) (Package, error) {
 	var data Package
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 
@@ -137,15 +140,17 @@ func (api BldrApi) fetchPackage(pkg PackageData) Package {
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
-		log.Fatal(readErr)
+		log.Error(readErr)
+		return Package{}, readErr
 	}
 
 	jsonErr := json.Unmarshal(body, &data)
 	if jsonErr != nil {
-		log.Fatal(jsonErr)
+		log.Error(jsonErr)
+		return Package{}, jsonErr
 	}
 
-	return data
+	return data, nil
 }
 
 func (api BldrApi) listAllPackages(origin string, channel string) Packages {

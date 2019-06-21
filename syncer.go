@@ -105,14 +105,22 @@ func (syncer Syncer) run() error {
 
 func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData, channel string) {
 	files := []string{}
-	deps := upstream.fetchPackageDeps(p)
+	deps, err := upstream.fetchPackageDeps(p)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	log.Info(fmt.Sprintf("Determined deps %s", deps))
 	for i, pkg := range deps {
 		pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
 
 		log.Info(fmt.Sprintf("Dependancy [%d/%d] %s", i+1, len(deps), pkgName))
 		if !target.packageExists(pkg) {
-			pack := upstream.fetchPackage(pkg)
+			pack, err := upstream.fetchPackage(pkg)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 			log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
 			file := upstream.downloadPackage(pack)
 			files = append(files, file)
@@ -121,7 +129,11 @@ func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData
 		}
 	}
 
-	pack := upstream.fetchPackage(p)
+	pack, err := upstream.fetchPackage(p)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
 	log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
 	file := upstream.downloadPackage(pack)
