@@ -19,10 +19,10 @@ func packageUpload(target BldrApi, fileName string, channel string) {
 	runHabCommandEnv(cmd, env)
 }
 
-func packagePromote(target BldrApi, pkgName string, channel string) {
+func packagePromote(target BldrApi, pkgName string, channel string, pkgTarget string) {
 	env := []string{"HAB_BLDR_URL=" + target.Url, "HAB_AUTH_TOKEN=" + target.AuthToken}
 
-	cmd := fmt.Sprintf("pkg promote \"%s\" %s", pkgName, channel)
+	cmd := fmt.Sprintf("pkg promote \"%s\" %s %s", pkgName, channel, pkgTarget)
 
 	log.Debug("Running `hab " + cmd + "`")
 

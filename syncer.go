@@ -133,7 +133,7 @@ func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData
 
 	// This is a safe guard, sometimes bad things happen on upload where we cannot sync the package to
 	// a channel. This will ensure the promotion is atleast attempted.
-	packagePromote(target, pkgName, channel)
+	packagePromote(target, pkgName, channel, pack.Target)
 	files = append(files, file)
 
 	log.Info("Cleaning up downloaded files")
