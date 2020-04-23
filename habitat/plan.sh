@@ -15,3 +15,4 @@ pkg_build_deps=(
 )
 pkg_svc_user="root"
 pkg_svc_group=$pkg_svc_user
+export GOFLAGS=-mod=vendor
