@@ -4,7 +4,6 @@ import (
 	// "github.com/BurntSushi/toml"
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -68,21 +67,14 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	log.Debug("Uploading diffed keys")
 	log.Debug(keys)
 
-	var wg sync.WaitGroup
 	for _, key := range keys {
 		// Sync Keys multi-threaded
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			data := upstream.fetchKeyData(key)
-			log.Debug(data)
-			fileName := key.Origin + "-" + key.Revision + ".pub"
-			target.uploadOriginKey(fileName, data, key.Origin)
-
-			wg.Done()
-		}(&wg)
+		data := upstream.fetchKeyData(key)
+		log.Debug(data)
+		fileName := key.Origin + "-" + key.Revision + ".pub"
+		target.uploadOriginKey(fileName, data, key.Origin)
 	}
 
-	wg.Wait()
 	return true
 }
 
