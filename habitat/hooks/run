@@ -1,3 +1,17 @@
 #!/bin/bash
 
-bldr_package_sync --config {{pkg.svc_config_path}}/config.toml sync
+{{#unless svc.me.leader ~}}
+  {{#unless svc.me.follower ~}}
+  echo "Running in standalone topology"
+  bldr_package_sync --config {{pkg.svc_config_path}}/config.toml sync
+  {{/unless ~}}
+{{/unless ~}}
+
+{{# if svc.me.leader ~}}
+  {{#unless svc.me.follower ~}}
+  echo "Running in leader topology as leader"
+  bldr_package_sync --config {{pkg.svc_config_path}}/config.toml sync
+  {{else ~}}
+  sleep {{cfg.interval}}
+  {{/unless ~}}
+{{/if ~}}
