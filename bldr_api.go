@@ -248,8 +248,6 @@ func (api BldrApi) uploadOriginKey(filename string, key string, origin string) b
 	log.Debug("Created File: " + file)
 
 	importPublicKey(api, dir, file)
-
-	os.Remove(file)
 	return true
 }
 

@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func packageUpload(target BldrApi, fileName string, channel string) {
@@ -72,6 +73,9 @@ func runHabCommandEnv(command string, habEnv []string) {
 	cmd := exec.Command("/bin/bash", "-c", command)
 	path := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	cmd.Env = append(cmd.Env, path)
+
+	cache := fmt.Sprintf("HAB_CACHE_KEY_PATH=%s", config.TempDir)
+	cmd.Env = append(cmd.Env, cache)
 
 	habEnv = append(habEnv, config.Env...)
 	cmd.Env = append(cmd.Env, habEnv...)

@@ -68,7 +68,6 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	log.Debug(keys)
 
 	for _, key := range keys {
-		// Sync Keys multi-threaded
 		data := upstream.fetchKeyData(key)
 		log.Debug(data)
 		fileName := key.Origin + "-" + key.Revision + ".pub"
