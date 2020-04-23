@@ -137,6 +137,10 @@ func (api BldrApi) fetchPackage(pkg PackageData) (Package, error) {
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s", api.Url, pkgName)
 
 	res := performGetRequest(url)
+	if res == nil {
+		log.Error("Error in builder API")
+		return Package{}, nil
+	}
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -172,13 +176,13 @@ func (api BldrApi) listPackages(origin string, channel string) Packages {
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
-		log.Fatal(readErr)
+		log.Error(jsonErr)
 	}
 
 	var pkgs Packages
 	jsonErr := json.Unmarshal(body, &pkgs)
 	if jsonErr != nil {
-		log.Fatal(jsonErr)
+		log.Error(jsonErr)
 	}
 
 	return pkgs

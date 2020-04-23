@@ -1,9 +1,10 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var SLEEP_TIME = 0
