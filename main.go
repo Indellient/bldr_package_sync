@@ -38,7 +38,7 @@ func main() {
 		},
 	}
 
-	app.Commands = []*cli.Command{
+	app.Commands = []cli.Command{
 		{
 			Name:    "sync",
 			Aliases: []string{"s"},
