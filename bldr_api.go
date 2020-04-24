@@ -176,7 +176,7 @@ func (api BldrApi) listPackages(origin string, channel string) Packages {
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
-		log.Error(jsonErr)
+		log.Error(readErr)
 	}
 
 	var pkgs Packages
