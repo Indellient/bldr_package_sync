@@ -96,6 +96,7 @@ func (syncer Syncer) run() error {
 
 func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData, channel string) {
 	files := []string{}
+	log.Info(fmt.Sprintf("Syncing package %v", p))
 	deps, err := upstream.fetchPackageDeps(p)
 	if err != nil {
 		log.Error(err)
