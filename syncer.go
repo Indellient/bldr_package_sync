@@ -63,6 +63,11 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	log.Info("Beginning the key sync process")
 	upstreamKeys := upstream.fetchKeyPaths(origin)
 	targetKeys := target.fetchKeyPaths(origin)
+
+	for _, upstreamKey := range upstreamKeys {
+		upstream.fetchKeyData(upstreamKey)
+	}
+
 	keys := difference(upstreamKeys, targetKeys)
 	log.Debug("Uploading diffed keys")
 	log.Debug(keys)
