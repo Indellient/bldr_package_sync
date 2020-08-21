@@ -3,7 +3,9 @@ package main
 import (
 	// "github.com/BurntSushi/toml"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -65,7 +67,12 @@ func (syncer Syncer) syncKeys(origin string, upstream BldrApi, target BldrApi) b
 	targetKeys := target.fetchKeyPaths(origin)
 
 	for _, upstreamKey := range upstreamKeys {
-		upstream.fetchKeyData(upstreamKey)
+		keyData := upstream.fetchKeyData(upstreamKey)
+		keyFileName := upstreamKey.Origin + "-" + upstreamKey.Revision + ".pub"
+		if err := ioutil.WriteFile(path.Join(syncer.config.TempDir, keyFileName), []byte(keyData), 0777); err != nil {
+			log.Fatal("Failed to write to temporary file", err)
+		}
+
 	}
 
 	keys := difference(upstreamKeys, targetKeys)
