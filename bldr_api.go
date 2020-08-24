@@ -64,7 +64,7 @@ type Package struct {
 	Visibility string        `json:"visibility"`
 }
 
-func (api BldrApi) downloadPackage(pack Package) string {
+func (api BldrApi) downloadPackage(pack Package) (string, error) {
 
 	pkg := pack.Ident
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", pkg.Origin, pkg.Name, pkg.Version, pkg.Release)
@@ -86,14 +86,19 @@ func (api BldrApi) downloadPackage(pack Package) string {
 	}
 	defer out.Close()
 
-	resp := performGetRequest(url)
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
+	res, err := performGetRequest(url)
 	if err != nil {
 		log.Error(err)
+		return "", err
+	}
+	// Write the body to file
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		log.Error(err)
+		return "", err
 	}
 
-	return location
+	return location, nil
 }
 
 // Package dependencies are allows in the stable channel
@@ -136,7 +141,10 @@ func (api BldrApi) fetchPackage(pkg PackageData) (Package, error) {
 
 	url := fmt.Sprintf("%s/v1/depot/pkgs/%s", api.Url, pkgName)
 
-	res := performGetRequest(url)
+	res, err := performGetRequest(url)
+	if err != nil {
+		log.Error(err)
+	}
 	if res == nil {
 		log.Error("Error in builder API")
 		return Package{}, nil
@@ -172,7 +180,10 @@ func (api BldrApi) listPackages(origin string, channel string) Packages {
 	PACKGE_PATH := "/v1/depot/channels/" + origin + "/" + channel + "/pkgs"
 
 	url := api.Url + PACKGE_PATH
-	res := performGetRequest(url)
+	res, err := performGetRequest(url)
+	if err != nil {
+		log.Error(err)
+	}
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -192,7 +203,10 @@ func (api BldrApi) listPackagesRange(origin string, channel string, count int) P
 	PACKGE_PATH := fmt.Sprintf("/v1/depot/channels/%s/%s/pkgs?range=%d", origin, channel, count)
 
 	url := api.Url + PACKGE_PATH
-	res := performGetRequest(url)
+	res, err := performGetRequest(url)
+	if err != nil {
+		log.Error(err)
+	}
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -212,7 +226,10 @@ func (api BldrApi) fetchKeyPaths(origin string) []OriginKey {
 	KEY_PATH := "/v1/depot/origins/" + origin + "/keys"
 
 	url := api.Url + KEY_PATH
-	res := performGetRequest(url)
+	res, err := performGetRequest(url)
+	if err != nil {
+		log.Error(err)
+	}
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
@@ -229,7 +246,10 @@ func (api BldrApi) fetchKeyPaths(origin string) []OriginKey {
 }
 
 func (api BldrApi) fetchKeyData(key OriginKey) string {
-	res := performGetRequest(api.Url + "/v1/depot" + key.Location)
+	res, err := performGetRequest(api.Url + "/v1/depot" + key.Location)
+	if err != nil {
+		log.Error(err)
+	}
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
 		log.Fatal(readErr)
