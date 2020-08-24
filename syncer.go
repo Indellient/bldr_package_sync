@@ -126,7 +126,11 @@ func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData
 				continue
 			}
 			log.Infof("Downloading package %s for target %s", pack.Name, pack.Target)
-			file := upstream.downloadPackage(pack)
+			file, err := upstream.downloadPackage(pack)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 			files = append(files, file)
 		} else {
 			log.Info(fmt.Sprintf("Dependancy %s exists in target, skipping download", pkgName))
@@ -138,9 +142,15 @@ func (syncer Syncer) syncPackage(upstream BldrApi, target BldrApi, p PackageData
 		log.Error(err)
 		return
 	}
+
 	pkgName := fmt.Sprintf("%s/%s/%s/%s", p.Origin, p.Name, p.Version, p.Release)
 	log.Info(fmt.Sprintf("Downloading package %s for target %s", pack.Name, pack.Target))
-	file := upstream.downloadPackage(pack)
+	file, err := upstream.downloadPackage(pack)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	log.Infof("Uploading package %s to channel %s", pkgName, channel)
 	packageUpload(target, file, channel)
 

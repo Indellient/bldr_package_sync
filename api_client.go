@@ -10,7 +10,7 @@ import (
 )
 
 // Implement status codes: https://golang.org/src/net/http/status.go
-func performGetRequest(url string) *http.Response {
+func performGetRequest(url string) (*http.Response, error) {
 
 	sleepTime := 0
 	retryCount := 0
@@ -19,7 +19,8 @@ func performGetRequest(url string) *http.Response {
 
 	for err != nil {
 		if retryCount >= 10 {
-			log.Fatal("Request was tried more than 10 times, giving up: " + url)
+			log.Error("Request was tried more than 10 times, giving up: " + url)
+			return nil, err
 		}
 		sleepTime = sleepTime + 1
 		retryCount = retryCount + 1
@@ -27,7 +28,7 @@ func performGetRequest(url string) *http.Response {
 		res, err = getRequest(url)
 	}
 
-	return res
+	return res, nil
 }
 
 // Performs an HTTP GET Method
